@@ -3,6 +3,7 @@ package org.zigman;
 import org.zigman.view.LoginPageView;
 
 import javax.swing.*;
+import java.awt.*;
 
 import static javax.swing.SwingUtilities.invokeLater;
 
@@ -12,9 +13,10 @@ public class MainThread {
     public static void main(String[] args) {
         final JFrame loginPage = new LoginPageView(TITLE);
         invokeLater(() -> {
-            loginPage.pack();
-            loginPage.setVisible(true);
-        }
+                    loginPage.setPreferredSize(new Dimension(300, 300));
+                    loginPage.pack();
+                    loginPage.setVisible(true);
+                }
         );
 
     }
