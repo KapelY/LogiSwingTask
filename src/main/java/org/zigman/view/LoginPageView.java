@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- *
+ * To add new input field - just add it's name to textFieldNames array.
  */
 public class LoginPageView extends JFrame {
     private final String[] textFieldNames = {
