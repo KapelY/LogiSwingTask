@@ -13,7 +13,7 @@ public class MainThread {
     public static void main(String[] args) {
         final JFrame loginPage = new LoginPageView(TITLE);
         invokeLater(() -> {
-                    loginPage.setPreferredSize(new Dimension(300, 300));
+                    loginPage.setPreferredSize(new Dimension(600, 300));
                     loginPage.pack();
                     loginPage.setVisible(true);
                 }

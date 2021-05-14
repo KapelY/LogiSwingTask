@@ -6,6 +6,7 @@ import org.zigman.model.TextField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Comparator;
 import java.util.List;
 
 public class PanelBuilder {
@@ -13,7 +14,6 @@ public class PanelBuilder {
 
         for (TextField textfield : textFieldList) {
             JPanel temp = new JPanel();
-//            temp.setLayout(new FlowLayout(FlowLayout.CENTER));
             temp.add(textfield.getLabel());
             temp.add(textfield.getJTextField());
             textPanel.add(temp);
@@ -29,34 +29,29 @@ public class PanelBuilder {
         return buttonPanel;
     }
 
-    public static JPanel buildTable(JPanel tablePanel, List<Client> clientsTable) {
-        int raws = clientsTable.size();
-        int columns = clientsTable.get(clientsTable.size() - 1).getTextFields().size();
+    public static JPanel buildTable(JPanel tablePanel, List<Client> clientsTable, String[] textFieldNames) {
 
-        System.out.println("raws = " + raws);
-        System.out.println("columns = " + columns);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        Client lastSavedClient = clientsTable.get(clientsTable.size() - 1);
-        gbc.weightx = 1f / lastSavedClient.getTextFields().size();
-        for (TextField textField : lastSavedClient.getTextFields()) {
-            gbc.gridx++;
-            tablePanel.add(new Label(textField.getLabel().getText()), gbc);
-        }
-        gbc.gridy = 1;
-        for (Client client : clientsTable) {
-            gbc.gridx = 0;
-            for (TextField field : client.getTextFields()) {
-                gbc.gridx++;
-                String temp = field.getJTextField().getText();
-                System.out.print(temp + " ");
-                tablePanel.add(new Label(temp), gbc);
+        int maxCountTextFields = clientsTable.stream()
+                .max(Comparator.comparing(v -> v.getTextFields().size())).get()
+                .getTextFields().size();
+        Client[] clients = clientsTable.toArray(new Client[0]);
+        String[][] data = new String[clients.length][maxCountTextFields];
+        for (int i = 0; i < clients.length; i++) {
+            String[] text = new String[maxCountTextFields];
+            String[] srcText = clients[i].getTextFields()
+                    .stream().map(e -> e.getJTextField().getText()).toArray(String[]::new);
+            System.arraycopy(srcText, 0, text, 0, srcText.length);
+            for (int j = 0; j < textFieldNames.length; j++) {
+                data[i][j] = text[j] != null ? text[j] : "";
             }
-            System.out.println();
-            gbc.gridy++;
         }
+        final JTable table = new JTable(data, textFieldNames);
+        table.setPreferredScrollableViewportSize(new Dimension(500, 100));
+        table.setFillsViewportHeight(true);
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        tablePanel.add(scrollPane);
+
         return tablePanel;
     }
 }

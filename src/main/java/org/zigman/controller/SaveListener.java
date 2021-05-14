@@ -3,59 +3,48 @@ package org.zigman.controller;
 import org.zigman.model.Client;
 import org.zigman.model.TextField;
 import org.zigman.util.PanelBuilder;
-import org.zigman.view.LoginPageView;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SaveListener implements ActionListener {
     List<TextField> textFieldList;
-    private List<Client> clientList;
-    private JPanel tablePanel;
-    private final static String EMAIL_FIELD_LABEL = "email";
-    private final static String NAME_FIELD_LABEL = "name";
+    private final List<Client> clientList;
+    private final JPanel tablePanel;
+    private final String[] textFieldNames;
+    private final static String EMAIL_FIELD_LABEL = "Email";
+    private final static String NAME_FIELD_LABEL = "Name";
 
-    public SaveListener(List<TextField> textFieldList, List<Client> clientList, JPanel tablePanel) {
+
+    public SaveListener(List<TextField> textFieldList, List<Client> clientList, JPanel tablePanel, String[] textFieldNames) {
         this.textFieldList = textFieldList;
         this.clientList = clientList;
         this.tablePanel = tablePanel;
+        this.textFieldNames = textFieldNames;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         TextField save = textFieldList.stream().filter((textField) ->
                 textField.getLabel().getText().equals(EMAIL_FIELD_LABEL)
-        ).findAny().orElse(null);
+        ).findAny().orElse(TextField.builder().build());
         TextField name = textFieldList.stream().filter((textField) ->
                 textField.getLabel().getText().equals(NAME_FIELD_LABEL)
-        ).findAny().orElse(null);
-//        System.out.println("In save ---  " + save.getJTextField().getText());
-        verifyEmailAddress(save.getJTextField().getText());
-//        System.out.println("In name --- " + name.getJTextField().getText());
-        verifyName(name.getJTextField().getText());
+        ).findAny().orElse(TextField.builder().build());
 
-        Client client = new Client(textFieldList);
-//        textFieldList.forEach(t -> t.getJTextField().setText("") );
-//        mainFrame.remove(tablePanel);
+        System.out.println("In save ---  " + save.getJTextField().getText());
+            verifyEmailAddress(save.getJTextField().getText());
+        System.out.println("In name --- " + name.getJTextField().getText());
+            verifyName(name.getJTextField().getText());
+
+        Client client = new Client(deepCopyTextFieldList());
         clientList.add(client);
-        tablePanel.removeAll();
-        tablePanel = PanelBuilder.buildTable(tablePanel, clientList);
-        tablePanel.revalidate();
-        tablePanel.repaint();
+        clearAllTextFields();
 
-//        mainFrame.add(PanelBuilder.buildTable(clientList));
-//        mainFrame.revalidate();
-//        mainFrame.repaint();
-//        mainFrame.add(tablePanel);
-//        mainFrame.setTablePanel(tablePanel);
-        System.out.println("Before repaint");
-//        mainFrame.pack();
-//        mainFrame.setVisible(true);
-//        mainFrame.repaint();
-        System.out.println("After repaint");
-
+        repaintTablePanel();
     }
 
     private void verifyName(String nameText) {
@@ -67,4 +56,23 @@ public class SaveListener implements ActionListener {
         final String REGEX = "(^[A-Za-z]+)([A-Za-z0-9+_.-]*)@[A-Za-z0-9+_.-]+$";
         System.out.println(emailAddress.matches(REGEX));
     }
+
+    private void repaintTablePanel() {
+        tablePanel.removeAll();
+        PanelBuilder.buildTable(tablePanel, clientList, textFieldNames);
+        tablePanel.revalidate();
+        tablePanel.repaint();
+    }
+
+    private List<TextField> deepCopyTextFieldList() {
+        return textFieldList.stream()
+                .map(e1 -> new TextField(e1.getLabel(), new JTextField(e1.getJTextField()
+                        .getText())))
+                .collect(Collectors.toList());
+    }
+
+    private void clearAllTextFields() {
+        textFieldList.forEach(t -> t.getJTextField().setText(""));
+    }
+
 }

@@ -1,7 +1,6 @@
 package org.zigman.view;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.zigman.controller.DataController;
 import org.zigman.controller.SaveListener;
 import org.zigman.model.Button;
 import org.zigman.model.Client;
@@ -13,126 +12,110 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Getter
-@Setter
 public class LoginPageView extends JFrame implements ActionListener {
+    private final String[] textFieldNames = {
+            "Name",
+            "Email"
+    };
+
+
+    private List<TextField> textFieldList;
+    private List<Button> buttonList;
+    private List<Client> clientList;
     private JPanel mainPanel = new JPanel();
     private JPanel textPanel = new JPanel();
     private JPanel buttonPanel = new JPanel();
     private JPanel tablePanel = new JPanel();
-//    final JScrollPane scrollPane = new JScrollPane(tablePanel);
-    private final List<TextField> textFieldList;
-    private final List<Button> buttonList;
-    private final List<Client> clientList = new ArrayList<>();
 
     public LoginPageView(String title) {
         super(title);
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-//        labPanel.setLayout(new BoxLayout(labPanel, BoxLayout.Y_AXIS));
-        tablePanel.setLayout(new GridBagLayout());
+        tablePanel.setLayout(new GridLayout(1, 0));
+        tablePanel.setOpaque(true);
 
-        //todo rm this
-        textFieldList = new ArrayList<>();
-        TextField name = TextField.builder().label(new JLabel("name")).build();
-        TextField email = TextField.builder().label(new JLabel("email")).build();;
-        TextField address = TextField.builder().label(new JLabel("address")).build();;
-        textFieldList.add(name);
-        textFieldList.add(email);
-        textFieldList.add(address);
-
+        textFieldList = createTextFieldList(textFieldNames);
         createTextPanel();
         mainPanel.add(textPanel);
 
 
-
-
-
-        JTextField jTextField1 = new JTextField();
-        JTextField jTextField2 = new JTextField();
-        JTextField jTextField3 = new JTextField();
-        jTextField1.setText("Jorge");
-        jTextField2.setText("jorge@gmail.com");
-        List<TextField> client1FieldList = new ArrayList<>();
-        client1FieldList.add(new TextField(new JLabel("name"), jTextField1));
-        client1FieldList.add(new TextField(new JLabel("email"), jTextField2));
-        Client client1 = new Client(client1FieldList);
-        clientList.add(client1);
-
-        jTextField1 = new JTextField();
-         jTextField2 = new JTextField();
-         jTextField3 = new JTextField();
-        jTextField1.setText("Jorge2");
-        jTextField2.setText("jorge2@gmail.com");
-        jTextField3.setText("Kyiv");
-        client1FieldList = new ArrayList<>();
-        client1FieldList.add(new TextField(new JLabel("name"), jTextField1));
-        client1FieldList.add(new TextField(new JLabel("email"), jTextField2));
-        client1FieldList.add(new TextField(new JLabel("address"), jTextField3));
-        Client client2 = new Client(client1FieldList);
-        clientList.add(client2);
-
-        createTablePanel();
-        mainPanel.add(tablePanel);
+//        clientList = new ArrayList<>();
+//        JTextField jTextField1 = new JTextField();
+//        JTextField jTextField2 = new JTextField();
+//        jTextField1.setText("Jorge");
+//        jTextField2.setText("jorge@gmail.com");
+//        List<TextField> client1FieldList = new ArrayList<>();
+//        client1FieldList.add(new TextField(new JLabel("name"), jTextField1));
+//        client1FieldList.add(new TextField(new JLabel("email"), jTextField2));
+//        Client client1 = new Client(client1FieldList);
+//        clientList.add(client1);
+//
+//        jTextField1 = new JTextField();
+//        jTextField2 = new JTextField();
+//        jTextField1.setText("Tom");
+//        jTextField2.setText("tom@gmail.com");
+//        client1FieldList = new ArrayList<>();
+//        client1FieldList.add(new TextField(new JLabel("name"), jTextField1));
+//        client1FieldList.add(new TextField(new JLabel("email"), jTextField2));
+//        Client client2 = new Client(client1FieldList);
+//        clientList.add(client2);
+        clientList = loadData();
 
         //todo rm this
         buttonList = new ArrayList<>();
         Button save = Button.builder().jButton(new JButton("save")).build();
-        save.getJButton().setActionCommand(save.getJButton().getName());
-        save.getJButton().addActionListener(this);
+        save.getJButton().addActionListener(
+                new SaveListener(textFieldList, clientList, tablePanel, textFieldNames));
         buttonList.add(save);
-        Button ok = Button.builder().jButton(new JButton("ok")).build();
-        ok.getJButton().setActionCommand(save.getJButton().getName());
+
+//        Button ok = Button.builder().jButton(new JButton("read")).build();
 //        ok.getJButton().addActionListener(this);
-        buttonList.add(ok);
-        Button cancel = Button.builder().jButton(new JButton("cancel")).build();
-        cancel.getJButton().setActionCommand(save.getJButton().getName());
-//        cancel.getJButton().addActionListener(this);
-        buttonList.add(cancel);
+//        buttonList.add(ok);
+//
+//        Button cancel = Button.builder().jButton(new JButton("write")).build();
+//        cancel.getJButton().addActionListener(...);
+//        buttonList.add(cancel);
 
         createButtonPanel();
         mainPanel.add(buttonPanel);
+
+        createTablePanel();
+        mainPanel.add(tablePanel);
 
         setContentPane(mainPanel);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    private void createTablePanel() {
+    private List<Client> loadData() {
+        return DataController.readData();
+    }
 
-        PanelBuilder.buildTable(tablePanel, clientList);
+    private void createTablePanel() {
+        PanelBuilder.buildTable(tablePanel, clientList, textFieldNames);
     }
 
     private void createButtonPanel() {
-
         PanelBuilder.buildButtons(buttonPanel, buttonList);
     }
 
     private void createTextPanel() {
-
         PanelBuilder.buildTextFields(textPanel, textFieldList);
+    }
+
+    private List<TextField> createTextFieldList(String[] labels) {
+        return Arrays.stream(labels)
+                .map(e -> TextField.builder().label(new JLabel(e)).build())
+                .collect(Collectors.toList());
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Client client = new Client(new ArrayList<>(textFieldList));
-//        textFieldList.forEach(t -> t.getJTextField().setText("") );
-//        mainPanel.removeAll();
-        clientList.add(client);
-        PanelBuilder.buildTable(tablePanel, clientList);
-//        textFieldList.forEach(textField -> {textField.getJTextField().setText("");});
-//        mainPanel.add(textPanel);
-//        mainPanel.add(buttonPanel);
-//        mainPanel.add(tablePanel);
-        mainPanel.revalidate();
-        mainPanel.repaint();
-
-
-
-//        String action =  e.getActionCommand();
-//        System.out.println(action);
-//        textFieldList.forEach((eeee)-> System.out.println(eeee.getJTextField().getText()));
+//        clientList = DataController.readData();
+//        DataController.writeData(clientList);
     }
 }
