@@ -16,7 +16,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class LoginPageView extends JFrame implements ActionListener {
+/**
+ *
+ */
+public class LoginPageView extends JFrame {
     private final String[] textFieldNames = {
             "Name",
             "Email"
@@ -43,43 +46,13 @@ public class LoginPageView extends JFrame implements ActionListener {
         createTextPanel();
         mainPanel.add(textPanel);
 
-
-//        clientList = new ArrayList<>();
-//        JTextField jTextField1 = new JTextField();
-//        JTextField jTextField2 = new JTextField();
-//        jTextField1.setText("Jorge");
-//        jTextField2.setText("jorge@gmail.com");
-//        List<TextField> client1FieldList = new ArrayList<>();
-//        client1FieldList.add(new TextField(new JLabel("name"), jTextField1));
-//        client1FieldList.add(new TextField(new JLabel("email"), jTextField2));
-//        Client client1 = new Client(client1FieldList);
-//        clientList.add(client1);
-//
-//        jTextField1 = new JTextField();
-//        jTextField2 = new JTextField();
-//        jTextField1.setText("Tom");
-//        jTextField2.setText("tom@gmail.com");
-//        client1FieldList = new ArrayList<>();
-//        client1FieldList.add(new TextField(new JLabel("name"), jTextField1));
-//        client1FieldList.add(new TextField(new JLabel("email"), jTextField2));
-//        Client client2 = new Client(client1FieldList);
-//        clientList.add(client2);
         clientList = loadData();
 
-        //todo rm this
         buttonList = new ArrayList<>();
         Button save = Button.builder().jButton(new JButton("save")).build();
         save.getJButton().addActionListener(
                 new SaveListener(textFieldList, clientList, tablePanel, textFieldNames));
         buttonList.add(save);
-
-//        Button ok = Button.builder().jButton(new JButton("read")).build();
-//        ok.getJButton().addActionListener(this);
-//        buttonList.add(ok);
-//
-//        Button cancel = Button.builder().jButton(new JButton("write")).build();
-//        cancel.getJButton().addActionListener(...);
-//        buttonList.add(cancel);
 
         createButtonPanel();
         mainPanel.add(buttonPanel);
@@ -111,11 +84,5 @@ public class LoginPageView extends JFrame implements ActionListener {
         return Arrays.stream(labels)
                 .map(e -> TextField.builder().label(new JLabel(e)).build())
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-//        clientList = DataController.readData();
-//        DataController.writeData(clientList);
     }
 }

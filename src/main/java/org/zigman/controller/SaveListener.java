@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SaveListener implements ActionListener {
-    List<TextField> textFieldList;
+    private final static String EMAIL_FIELD_LABEL = "Email";
+    private final static String NAME_FIELD_LABEL = "Name";
     private final List<Client> clientList;
     private final JPanel tablePanel;
     private final String[] textFieldNames;
-    private final static String EMAIL_FIELD_LABEL = "Email";
-    private final static String NAME_FIELD_LABEL = "Name";
+    List<TextField> textFieldList;
 
 
     public SaveListener(List<TextField> textFieldList, List<Client> clientList, JPanel tablePanel, String[] textFieldNames) {
@@ -35,26 +35,35 @@ public class SaveListener implements ActionListener {
                 textField.getLabel().getText().equals(NAME_FIELD_LABEL)
         ).findAny().orElse(TextField.builder().build());
 
-        System.out.println("In save ---  " + save.getJTextField().getText());
-            verifyEmailAddress(save.getJTextField().getText());
-        System.out.println("In name --- " + name.getJTextField().getText());
-            verifyName(name.getJTextField().getText());
+        boolean isValidEmail = verifyEmailAddress(save.getJTextField().getText());
+        boolean isValidName = verifyName(name.getJTextField().getText());
 
-        Client client = new Client(deepCopyTextFieldList());
-        clientList.add(client);
-        clearAllTextFields();
+        if (isValidEmail && isValidName) {
+            Client client = new Client(deepCopyTextFieldList());
+            clientList.add(client);
+            clearAllTextFields();
 
-        repaintTablePanel();
+            repaintTablePanel();
+            DataController.writeData(clientList);
+        }
     }
 
-    private void verifyName(String nameText) {
+    private boolean verifyName(String nameText) {
         final String REGEX = "(^[A-Za-z]+)(\\s+[A-Za-z]+){0,3}";
-        System.out.println(nameText.trim().matches(REGEX));
+        if (!nameText.trim().matches(REGEX)) {
+            JOptionPane.showMessageDialog(null, "name is not valid(only Latin alphabet, no more than 4 words)");
+            return false;
+        }
+        return true;
     }
 
-    private void verifyEmailAddress(String emailAddress) {
+    private boolean verifyEmailAddress(String emailAddress) {
         final String REGEX = "(^[A-Za-z]+)([A-Za-z0-9+_.-]*)@[A-Za-z0-9+_.-]+$";
-        System.out.println(emailAddress.matches(REGEX));
+        if (!emailAddress.trim().matches(REGEX)) {
+            JOptionPane.showMessageDialog(null, "email is not valid(address consists of two parts, \nseparated by \"@\". Only Latin alphabet, numbers and symbols \"-\", \"_\", \".\". Starts only with Latin alphabet.");
+            return false;
+        }
+        return true;
     }
 
     private void repaintTablePanel() {
